@@ -3,204 +3,761 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>منتجات تنبؤات الألعاب بالذكاء الاصطناعي - المغرب</title>
+    <title>منبئ الألغام بالذكاء الاصطناعي</title>
     <link
-      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap"
       rel="stylesheet"
     />
     <style>
-      .console-box {
-        font-family: monospace;
-        background-color: #1a1a1a;
-        padding: 1rem;
-        border-radius: 0.5rem;
-        box-shadow: 0 0 20px #00ff88;
-        color: #00ff88;
-        height: 250px;
-        overflow-y: auto;
-      }
-      .loading-screen {
-        font-family: monospace;
-        background: #000;
-        color: #00ff88;
+      body {
+        font-family: "Tajawal", sans-serif;
+        background-color: #121212;
+        color: white;
+        text-align: center;
+        margin: 0;
+        padding: 20px;
+        min-height: 100vh;
         display: flex;
-        align-items: center;
         justify-content: center;
-        height: 100vh;
+        align-items: center;
+      }
+
+      body.modal-open {
+        overflow: hidden;
+      }
+
+      .game-container {
+        max-width: 600px;
+        width: 100%;
+        margin: 0 auto;
+        background-color: #1e1e1e;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        transform: translateY(0);
+        transition: transform 0.3s ease;
+        position: relative;
+      }
+
+      .game-container:hover {
+        transform: translateY(-5px);
+      }
+
+      h1 {
+        color: #ffcc00;
+        margin-bottom: 10px;
+        font-weight: 700;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .board {
+        display: grid;
+        gap: 10px;
+        margin: 25px 0;
+        perspective: 1000px;
+        min-height: 60px;
+      }
+
+      .cell {
+        width: 100%;
+        aspect-ratio: 1;
+        background-color: #333;
+        border-radius: 8px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 24px;
+        cursor: default;
+        user-select: none;
+        transform-style: preserve-3d;
+        transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        opacity: 0;
+        transform: scale(0.8) rotateY(180deg);
+      }
+
+      .cell.visible {
+        opacity: 1;
+        transform: scale(1) rotateY(0deg);
+      }
+
+      .cell.mine {
+        background-color: #ff4444;
+        animation: pulse 1.5s infinite alternate;
+      }
+
+      .cell.gem {
+        background-color: #2a2a2a;
+        color: #00cc66;
+        animation: float 3s ease-in-out infinite;
+      }
+
+      .bet-amount {
+        font-size: 24px;
+        font-weight: 700;
+        color: #ffcc00;
+        margin: 15px 0;
+        text-shadow: 0 0 10px rgba(255, 204, 0, 0.3);
+      }
+
+      .controls {
+        margin-top: 10px;
+        display: flex;
+        justify-content: center;
+        gap: 20px;
         flex-direction: column;
-        z-index: 50;
-        position: fixed;
+        align-items: center;
+      }
+
+      .settings {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        flex-wrap: wrap;
+      }
+
+      .setting-group {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      button {
+        background-color: #ffcc00;
+        color: #121212;
+        border: none;
+        padding: 14px 30px;
+        border-radius: 8px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 16px;
+        letter-spacing: 0.5px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
+        width: 200px;
+        font-family: "Tajawal", sans-serif;
+      }
+
+      button:hover {
+        background-color: #ffdd33;
+        transform: translateY(-3px);
+        box-shadow: 0 7px 14px rgba(0, 0, 0, 0.2);
+      }
+
+      button:active {
+        transform: translateY(1px);
+      }
+
+      button:disabled {
+        background-color: #444;
+        color: #777;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+
+      button:disabled:hover::after {
+        opacity: 0;
+      }
+
+      button::after {
+        content: "";
+        position: absolute;
         top: 0;
         left: 0;
         width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          45deg,
+          transparent 25%,
+          rgba(255, 255, 255, 0.1) 50%,
+          transparent 75%
+        );
+        background-size: 400% 400%;
+        opacity: 0;
+        transition: all 0.5s ease;
       }
-      .hidden-screen {
+
+      button:hover::after {
+        opacity: 1;
+        animation: shine 1.5s infinite;
+      }
+
+      select,
+      input {
+        padding: 10px 20px;
+        border-radius: 8px;
+        background-color: #333;
+        color: white;
+        border: none;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        appearance: none;
+        width: 200px;
+        text-align: center;
+      }
+
+      input {
+        cursor: text;
+        background-image: none !important;
+      }
+
+      input:invalid {
+        border: 2px solid #ff4444;
+      }
+
+      input:valid {
+        border: 2px solid #00cc66;
+      }
+
+      select:hover,
+      input:hover {
+        background-color: #444;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 700;
+        color: #ddd;
+      }
+
+      .hidden {
         display: none;
       }
-      .disabled-btn {
-        opacity: 0.5;
-        cursor: not-allowed;
+
+      .id-form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 30px;
       }
-      .game-btn {
+
+      .error-message {
+        color: #ff4444;
+        margin-top: 5px;
+        font-size: 14px;
+        height: 20px;
+      }
+
+      /* Loading overlay styles */
+      .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.8);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
         transition: all 0.3s ease;
+      }
+
+      .loading-overlay.active {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid rgba(255, 204, 0, 0.3);
+        border-radius: 50%;
+        border-top-color: #ffcc00;
+        animation: spin 1s ease-in-out infinite;
+        margin-bottom: 20px;
+      }
+
+      .loading-text {
+        color: #ffcc00;
+        font-size: 18px;
+        font-weight: 700;
+      }
+
+      /* How to use button */
+      .how-to-use-btn {
+        background-color: transparent;
+        border: 2px solid #ffcc00;
+        color: #ffcc00;
+        margin: 0 auto 25px;
+        width: 90%;
+        max-width: 400px;
+        white-space: nowrap;
+      }
+
+      .how-to-use-btn:hover {
+        background-color: rgba(255, 204, 0, 0.1);
+      }
+
+      /* Modal styles */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+      }
+
+      .modal-overlay.active {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .modal-content {
+        background-color: #1e1e1e;
+        border-radius: 15px;
+        padding: 30px;
+        max-width: 500px;
+        width: 90%;
+        position: relative;
+        transform: translateY(20px);
+        transition: transform 0.3s ease;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      }
+
+      .modal-overlay.active .modal-content {
+        transform: translateY(0);
+      }
+
+      .close-modal {
+        position: absolute;
+        top: 15px;
+        left: 15px; /* For RTL */
+        font-size: 24px;
+        color: #aaa;
+        cursor: pointer;
+        transition: color 0.3s ease;
+      }
+
+      .close-modal:hover {
+        color: #ff4444;
+      }
+
+      .modal-title {
+        color: #ffcc00;
+        margin-bottom: 20px;
+        font-size: 22px;
+      }
+
+      .modal-text {
+        text-align: right;
+        line-height: 1.6;
+        margin-bottom: 20px;
+      }
+
+      .modal-text ol {
+        padding-right: 20px;
+        padding-left: 0;
+      }
+
+      .modal-text li {
+        margin-bottom: 15px;
+      }
+
+      .modal-text strong {
+        color: #ffcc00;
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+        }
+        100% {
+          transform: scale(1.05);
+        }
+      }
+
+      @keyframes float {
+        0% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-5px);
+        }
+        100% {
+          transform: translateY(0px);
+        }
+      }
+
+      @keyframes shine {
+        0% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Scrollbar styles */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: #1e1e1e;
+        border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: #ffcc00;
+        border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: #ffdd33;
       }
     </style>
   </head>
-  <body class="bg-gray-900 text-white font-sans">
-    <div id="loading" class="loading-screen">
-      <p>جاري التحميل... الرجاء الانتظار لحظة.</p>
+  <body>
+    <div class="loading-overlay" id="loading-overlay">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">جارٍ التحقق من الهوية...</div>
     </div>
 
-    <div id="mainContent" class="hidden-screen">
-      <header class="w-full bg-gray-800 p-4 flex justify-between items-center">
-        <h1 class="text-xl font-bold text-green-400">
-          متنبئ الذكاء الاصطناعي 1xBet المغرب
-        </h1>
-        <nav class="space-x-4">
-          <a href="#how" class="hover:text-green-400">كيف يعمل</a>
-          <a href="#games" class="hover:text-green-400">الألعاب</a>
-          <a href="#start" class="hover:text-green-400">ابدأ الآن</a>
-        </nav>
-      </header>
-
-      <section
-        class="min-h-screen flex flex-col items-center justify-center px-4 text-center"
-      >
-        <h2 class="text-3xl md:text-5xl font-bold mb-6">
-          اربح أموال حقيقية (MAD) مع تنبؤات ألعاب الذكاء الاصطناعي
-        </h2>
-        <p class="max-w-xl mb-8 text-gray-300">
-          انضم إلى آلاف اللاعبين المغاربة الذين يستخدمون ذكاءنا الاصطناعي للفوز
-          في الألعاب الشهيرة. دقة الإشارات 96٪، تنبؤات في الوقت الحقيقي، وسحوبات
-          سريعة!
-        </p>
-
-        <button
-          id="startButton"
-          class="bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-xl text-lg transition"
-        >
-          ابدأ الآن
-        </button>
-
-        <div id="idInputSection" class="hidden mt-6 max-w-sm w-full">
-          <input
-            id="betIdInput"
-            type="text"
-            inputmode="numeric"
-            pattern="\d*"
-            placeholder="معرف 1xBet الخاص بك"
-            class="w-full p-3 rounded-lg border border-gray-600 bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-green-400"
-          />
-          <button
-            id="submitIdBtn"
-            class="mt-4 w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg"
-          >
-            إرسال المعرف
-          </button>
-          <p id="inputError" class="hidden mt-2 text-red-500 text-sm">
-            الرجاء إدخال معرف 1xBet صحيح (6 أرقام على الأقل).
+    <div class="modal-overlay" id="modal-overlay">
+      <div class="modal-content">
+        <span class="close-modal" id="close-modal">&times;</span>
+        <h3 class="modal-title">كيفية استخدام البوت</h3>
+        <div class="modal-text">
+          <ol>
+            <li>
+              <strong>أولاً</strong> يجب أن تعرف المبلغ الذي تحتاج إلى المراهنة
+              عليه بالنقر على الزر - "الحصول على مبلغ الرهان"
+            </li>
+            <li>
+              <strong>يجب</strong> عليك أولاً إجراء رهان بالمبلغ المعروض وعندها
+              فقط انقر على زر "الحصول على الإشارة"
+            </li>
+          </ol>
+          <p>!هذه هي الطريقة الوحيدة للفوز</p>
+          <p>
+            إذا أخذت إشارة ولم تقم بوضع رهان للتحقق من البوت، فستحصل على إشارة
+            غير صحيحة لأن البوت لا يرى رهانك على موقع 1xBet ولا يمكنه تحليل
+            إشارة الفوز.
+          </p>
+          <p>
+            إذا خسرت، فهذا يعني أنك تفعل شيئًا خاطئًا. أو إذا كنت متأكدًا من أنك
+            تفعل كل شيء بشكل صحيح، فغير المتصفح أو العب مع VPN.
           </p>
         </div>
+      </div>
+    </div>
 
-        <div id="gameButtonsSection" class="hidden mt-8 w-full max-w-md">
-          <h3 class="text-xl font-semibold mb-4">اختر لعبتك</h3>
-          <div class="grid grid-cols-1 gap-4">
-            <a
-              href="https://ma-aviator-predictor.vercel.app/"
-              class="game-btn bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg"
-            >
-              تنبؤات الطائرة
-            </a>
-            <a
-              href="https://ma-mines-predictor.vercel.app/"
-              class="game-btn bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg"
-            >
-              تنبؤات الألغام
-            </a>
-            <a
-              href="https://mad-chicken-road.vercel.app/"
-              class="game-btn bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg"
-            >
-              توقعات طريق الدجاج
-            </a>
-            <a
-              href="https://mad-penalty.vercel.app/"
-              class="game-btn bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg"
-            >
-              تنبؤات الجزاء
-            </a>
+    <div class="game-container">
+      <h1>منبئ الألغام بالذكاء الاصطناعي</h1>
+      <button class="how-to-use-btn" id="how-to-use-btn">
+        كيفية استخدام البوت
+      </button>
+
+      <div class="id-form" id="id-form">
+        <div class="setting-group">
+          <label for="user-id">أدخل معرف حساب 1XBET الخاص بك</label>
+          <input
+            type="text"
+            id="user-id"
+            pattern="\d{8,}"
+            inputmode="numeric"
+            placeholder="معرف حساب 1xBet الخاص بك"
+            required
+            title="الرجاء إدخال 8 أرقام على الأقل"
+          />
+          <div class="error-message" id="error-message"></div>
+        </div>
+        <button id="verify-btn">تحقق من الهوية</button>
+      </div>
+
+      <div id="game-content" class="hidden">
+        <div class="settings">
+          <div class="setting-group">
+            <label for="grid-size">حجم الشبكة</label>
+            <select id="grid-size">
+              <option value="3">3×3</option>
+              <option value="4">4×4</option>
+              <option value="5" selected>5×5</option>
+              <option value="6">6×6</option>
+              <option value="7">7×7</option>
+            </select>
+          </div>
+
+          <div class="setting-group">
+            <label for="mines">عدد الألغام</label>
+            <select id="mines">
+              <option value="1">1 لغم</option>
+              <option value="2">2 لغم</option>
+              <option value="3" selected>3 ألغام</option>
+              <option value="4">4 ألغام</option>
+              <option value="5">5 ألغام</option>
+              <option value="6">6 ألغام</option>
+              <option value="7">7 ألغام</option>
+              <option value="10">10 ألغام</option>
+              <option value="15">15 لغم</option>
+            </select>
           </div>
         </div>
-      </section>
 
-      <section id="how" class="py-16 bg-gray-800 px-4">
-        <div class="max-w-4xl mx-auto">
-          <h2 class="text-3xl font-bold mb-8 text-center">كيف يعمل</h2>
-          <div class="grid md:grid-cols-3 gap-8">
-            <div class="bg-gray-700 p-6 rounded-lg">
-              <h3 class="text-xl font-semibold mb-3 text-green-400">
-                1. أدخل معرفك
-              </h3>
-              <p>أدخل معرف حساب 1xBet المغرب الخاص بك للبدء.</p>
-            </div>
-            <div class="bg-gray-700 p-6 rounded-lg">
-              <h3 class="text-xl font-semibold mb-3 text-green-400">
-                2. اختر لعبة
-              </h3>
-              <p>اختر من بين ألعاب التنبؤ المدعومة المتاحة في المغرب.</p>
-            </div>
-            <div class="bg-gray-700 p-6 rounded-lg">
-              <h3 class="text-xl font-semibold mb-3 text-green-400">
-                3. احصل على التنبؤات
-              </h3>
-              <p>احصل على تنبؤات مدعومة بالذكاء الاصطناعي بدقة 96٪.</p>
-            </div>
+        <div class="board" id="board"></div>
+
+        <div class="controls">
+          <div class="bet-amount hidden" id="bet-amount-container">
+            مبلغ رهانك: <span id="bet-amount">0</span> MAD
+          </div>
+          <div class="buttons">
+            <button id="get-bet-btn" onclick="getBetAmount()">
+              الحصول على مبلغ الرهان
+            </button>
+            <button id="signal-btn" onclick="getSignal()" disabled>
+              الحصول على الإشارة
+            </button>
           </div>
         </div>
-      </section>
-
-      <footer class="text-center text-gray-500 text-sm py-6">
-        © 2025 متنبئ الذكاء الاصطناعي المغرب. غير تابع لـ 1xBet. استخدم
-        بمسؤولية.
-      </footer>
+      </div>
     </div>
 
     <script>
-      // Loading screen logic
-      setTimeout(() => {
-        document.getElementById("loading").classList.add("hidden-screen");
-        document
-          .getElementById("mainContent")
-          .classList.remove("hidden-screen");
-      }, 3000);
+      // DOM elements
+      const idForm = document.getElementById("id-form");
+      const gameContent = document.getElementById("game-content");
+      const userIdInput = document.getElementById("user-id");
+      const verifyBtn = document.getElementById("verify-btn");
+      const errorMessage = document.getElementById("error-message");
+      const boardElement = document.getElementById("board");
+      const gridSizeSelect = document.getElementById("grid-size");
+      const minesSelect = document.getElementById("mines");
+      const signalButton = document.getElementById("signal-btn");
+      const getBetButton = document.getElementById("get-bet-btn");
+      const betAmountContainer = document.getElementById(
+        "bet-amount-container"
+      );
+      const betAmountElement = document.getElementById("bet-amount");
+      const loadingOverlay = document.getElementById("loading-overlay");
+      const howToUseBtn = document.getElementById("how-to-use-btn");
+      const modalOverlay = document.getElementById("modal-overlay");
+      const closeModal = document.getElementById("close-modal");
 
-      // Elements
-      const startButton = document.getElementById("startButton");
-      const idInputSection = document.getElementById("idInputSection");
-      const submitIdBtn = document.getElementById("submitIdBtn");
-      const betIdInput = document.getElementById("betIdInput");
-      const inputError = document.getElementById("inputError");
-      const gameButtonsSection = document.getElementById("gameButtonsSection");
+      // Game state
+      const gameState = {
+        gridSize: 5,
+        mineCount: 3,
+        board: [],
+        userId: null,
+        fixedMines: null,
+        betAmount: 0,
+        betGenerated: false,
+      };
 
-      // Show input field on button click
-      startButton.addEventListener("click", () => {
-        startButton.classList.add("hidden");
-        idInputSection.classList.remove("hidden");
-      });
+      // Initialize with ID form only
+      boardElement.innerHTML = "";
 
-      // Submit ID logic
-      submitIdBtn.addEventListener("click", () => {
-        const value = betIdInput.value.trim();
-        const isValid = /^\d{6,}$/.test(value); // at least 6 digits
-
-        if (!isValid) {
-          inputError.classList.remove("hidden");
+      // Verify ID button handler
+      verifyBtn.addEventListener("click", () => {
+        if (userIdInput.validity.valid) {
+          loadingOverlay.classList.add("active");
+          setTimeout(() => {
+            gameState.userId = userIdInput.value;
+            loadingOverlay.classList.remove("active");
+            idForm.remove();
+            gameContent.classList.remove("hidden");
+            errorMessage.textContent = "";
+          }, 4000);
         } else {
-          inputError.classList.add("hidden");
-          idInputSection.classList.add("hidden");
-          gameButtonsSection.classList.remove("hidden");
+          errorMessage.textContent = "يجب أن يتكون المعرف من 8 أرقام على الأقل";
         }
       });
+
+      // How to use button handler
+      howToUseBtn.addEventListener("click", () => {
+        document.body.classList.add("modal-open");
+        modalOverlay.classList.add("active");
+      });
+
+      // Close modal handlers
+      closeModal.addEventListener("click", () => {
+        document.body.classList.remove("modal-open");
+        modalOverlay.classList.remove("active");
+      });
+
+      modalOverlay.addEventListener("click", (e) => {
+        if (e.target === modalOverlay) {
+          document.body.classList.remove("modal-open");
+          modalOverlay.classList.remove("active");
+        }
+      });
+
+      // Force numeric input
+      userIdInput.addEventListener("input", function () {
+        this.value = this.value.replace(/\D/g, "");
+        errorMessage.textContent = "";
+      });
+
+      // Generate bet amount
+      function getBetAmount() {
+        // Clear previous signal
+        boardElement.innerHTML = "";
+
+        // Disable button during generation
+        getBetButton.disabled = true;
+        getBetButton.textContent = "جارٍ التوليد...";
+
+        // Show loading state for 3 seconds
+        setTimeout(() => {
+          // Generates a random value from {5, 10, 15, 20, 25, 30}
+          gameState.betAmount = (Math.floor(Math.random() * 6) + 1) * 5;
+
+          // Display the bet amount
+          betAmountElement.textContent = gameState.betAmount;
+          betAmountContainer.classList.remove("hidden");
+
+          // Enable signal button and reset bet button
+          signalButton.disabled = false;
+          getBetButton.textContent = "الحصول على مبلغ الرهان";
+          getBetButton.disabled = false;
+
+          gameState.betGenerated = true;
+        }, 3000);
+      }
+
+      // Generate new signal (reveal all cells)
+      function getSignal() {
+        if (!gameState.betGenerated) return;
+
+        // Disable buttons during animation
+        signalButton.disabled = true;
+        getBetButton.disabled = true;
+        signalButton.textContent = "جارٍ التحليل بالذكاء الاصطناعي...";
+
+        // Get selected settings
+        gameState.gridSize = parseInt(gridSizeSelect.value);
+        gameState.mineCount = parseInt(minesSelect.value);
+
+        // Validate mine count doesn't exceed grid capacity
+        const maxMines = Math.min(
+          gameState.gridSize * gameState.gridSize - 1,
+          15
+        );
+        gameState.mineCount = Math.min(gameState.mineCount, maxMines);
+
+        // Reset board
+        gameState.board = Array(gameState.gridSize * gameState.gridSize).fill(
+          "gem"
+        );
+
+        // Place mines - either fixed or random
+        if (
+          gameState.fixedMines &&
+          gameState.fixedMines.length === gameState.mineCount
+        ) {
+          // Use fixed mines positions
+          for (const mineIndex of gameState.fixedMines) {
+            if (mineIndex >= 0 && mineIndex < gameState.board.length) {
+              gameState.board[mineIndex] = "mine";
+            }
+          }
+        } else {
+          // Place mines randomly
+          let minesPlaced = 0;
+          while (minesPlaced < gameState.mineCount) {
+            const randomIndex = Math.floor(
+              Math.random() * gameState.board.length
+            );
+            if (gameState.board[randomIndex] !== "mine") {
+              gameState.board[randomIndex] = "mine";
+              minesPlaced++;
+            }
+          }
+        }
+
+        // Prepare board element
+        boardElement.innerHTML = "";
+        boardElement.style.gridTemplateColumns = `repeat(${gameState.gridSize}, 1fr)`;
+
+        // Create cells
+        for (let i = 0; i < gameState.board.length; i++) {
+          const cell = document.createElement("div");
+          cell.className = "cell";
+
+          if (gameState.board[i] === "mine") {
+            cell.classList.add("mine");
+            cell.textContent = "💣";
+          } else {
+            cell.classList.add("gem");
+            cell.textContent = "💎";
+          }
+
+          boardElement.appendChild(cell);
+
+          // Trigger animation with staggered delay
+          setTimeout(() => {
+            cell.classList.add("visible");
+          }, 50 * ((i % gameState.gridSize) + Math.floor(i / gameState.gridSize)));
+        }
+
+        // Re-enable bet button for next round (keep signal button disabled)
+        setTimeout(() => {
+          getBetButton.disabled = false;
+          signalButton.textContent = "الحصول على الإشارة";
+        }, 1000);
+      }
+
+      // Function to set fixed mines (available in console)
+      window.setFixedMines = function (...positions) {
+        if (positions.length === 0) {
+          console.error("الرجاء تقديم موضع لغم واحد على الأقل");
+          return;
+        }
+        if (!positions.every((pos) => Number.isInteger(pos) && pos >= 0)) {
+          console.error("يجب أن تكون جميع المواضع أعدادًا صحيحة موجبة");
+          return;
+        }
+        gameState.fixedMines = positions;
+        console.log(`تم تعيين ألغام ثابتة في المواضع: ${positions.join(", ")}`);
+        console.log('سيستخدم "الحصول على الإشارة" التالي هذه المواضع');
+      };
+
+      // Function to reset fixed mines (available in console)
+      window.resetMines = function () {
+        gameState.fixedMines = null;
+        console.log(
+          "تم إعادة تعيين الألغام الثابتة - العودة إلى السلوك العشوائي"
+        );
+      };
+
+      // Function to show current settings (available in console)
+      window.showSettings = function () {
+        console.log("الإعدادات الحالية:");
+        console.log(`حجم الشبكة: ${gameState.gridSize}x${gameState.gridSize}`);
+        console.log(`عدد الألغام: ${gameState.mineCount}`);
+        if (gameState.fixedMines) {
+          console.log(
+            `مواضع الألغام الثابتة: ${gameState.fixedMines.join(", ")}`
+          );
+        } else {
+          console.log("الألغام: عشوائية");
+        }
+      };
     </script>
   </body>
 </html>
