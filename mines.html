@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>منتجات تنبؤات الألعاب بالذكاء الاصطناعي - المغرب</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      .console-box {
+        font-family: monospace;
+        background-color: #1a1a1a;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 0 20px #00ff88;
+        color: #00ff88;
+        height: 250px;
+        overflow-y: auto;
+      }
+      .loading-screen {
+        font-family: monospace;
+        background: #000;
+        color: #00ff88;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        flex-direction: column;
+        z-index: 50;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+      }
+      .hidden-screen {
+        display: none;
+      }
+      .disabled-btn {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .game-btn {
+        transition: all 0.3s ease;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-900 text-white font-sans">
+    <div id="loading" class="loading-screen">
+      <p>جاري التحميل... الرجاء الانتظار لحظة.</p>
+    </div>
+
+    <div id="mainContent" class="hidden-screen">
+      <header class="w-full bg-gray-800 p-4 flex justify-between items-center">
+        <h1 class="text-xl font-bold text-green-400">
+          متنبئ الذكاء الاصطناعي 1xBet المغرب
+        </h1>
+        <nav class="space-x-4">
+          <a href="#how" class="hover:text-green-400">كيف يعمل</a>
+          <a href="#games" class="hover:text-green-400">الألعاب</a>
+          <a href="#start" class="hover:text-green-400">ابدأ الآن</a>
+        </nav>
+      </header>
+
+      <section
+        class="min-h-screen flex flex-col items-center justify-center px-4 text-center"
+      >
+        <h2 class="text-3xl md:text-5xl font-bold mb-6">
+          اربح أموال حقيقية (MAD) مع تنبؤات ألعاب الذكاء الاصطناعي
+        </h2>
+        <p class="max-w-xl mb-8 text-gray-300">
+          انضم إلى آلاف اللاعبين المغاربة الذين يستخدمون ذكاءنا الاصطناعي للفوز
+          في الألعاب الشهيرة. دقة الإشارات 96٪، تنبؤات في الوقت الحقيقي، وسحوبات
+          سريعة!
+        </p>
+
+        <button
+          id="startButton"
+          class="bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-xl text-lg transition"
+        >
+          ابدأ الآن
+        </button>
+
+        <div id="idInputSection" class="hidden mt-6 max-w-sm w-full">
+          <input
+            id="betIdInput"
+            type="text"
+            inputmode="numeric"
+            pattern="\d*"
+            placeholder="معرف 1xBet الخاص بك"
+            class="w-full p-3 rounded-lg border border-gray-600 bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-green-400"
+          />
+          <button
+            id="submitIdBtn"
+            class="mt-4 w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg"
+          >
+            إرسال المعرف
+          </button>
+          <p id="inputError" class="hidden mt-2 text-red-500 text-sm">
+            الرجاء إدخال معرف 1xBet صحيح (6 أرقام على الأقل).
+          </p>
+        </div>
+
+        <div id="gameButtonsSection" class="hidden mt-8 w-full max-w-md">
+          <h3 class="text-xl font-semibold mb-4">اختر لعبتك</h3>
+          <div class="grid grid-cols-1 gap-4">
+            <a
+              href="https://ma-aviator-predictor.vercel.app/"
+              class="game-btn bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg"
+            >
+              تنبؤات الطائرة
+            </a>
+            <a
+              href="https://ma-mines-predictor.vercel.app/"
+              class="game-btn bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg"
+            >
+              تنبؤات الألغام
+            </a>
+            <a
+              href="https://mad-chicken-road.vercel.app/"
+              class="game-btn bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg"
+            >
+              توقعات طريق الدجاج
+            </a>
+            <a
+              href="https://mad-penalty.vercel.app/"
+              class="game-btn bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg"
+            >
+              تنبؤات الجزاء
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section id="how" class="py-16 bg-gray-800 px-4">
+        <div class="max-w-4xl mx-auto">
+          <h2 class="text-3xl font-bold mb-8 text-center">كيف يعمل</h2>
+          <div class="grid md:grid-cols-3 gap-8">
+            <div class="bg-gray-700 p-6 rounded-lg">
+              <h3 class="text-xl font-semibold mb-3 text-green-400">
+                1. أدخل معرفك
+              </h3>
+              <p>أدخل معرف حساب 1xBet المغرب الخاص بك للبدء.</p>
+            </div>
+            <div class="bg-gray-700 p-6 rounded-lg">
+              <h3 class="text-xl font-semibold mb-3 text-green-400">
+                2. اختر لعبة
+              </h3>
+              <p>اختر من بين ألعاب التنبؤ المدعومة المتاحة في المغرب.</p>
+            </div>
+            <div class="bg-gray-700 p-6 rounded-lg">
+              <h3 class="text-xl font-semibold mb-3 text-green-400">
+                3. احصل على التنبؤات
+              </h3>
+              <p>احصل على تنبؤات مدعومة بالذكاء الاصطناعي بدقة 96٪.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="text-center text-gray-500 text-sm py-6">
+        © 2025 متنبئ الذكاء الاصطناعي المغرب. غير تابع لـ 1xBet. استخدم
+        بمسؤولية.
+      </footer>
+    </div>
+
+    <script>
+      // Loading screen logic
+      setTimeout(() => {
+        document.getElementById("loading").classList.add("hidden-screen");
+        document
+          .getElementById("mainContent")
+          .classList.remove("hidden-screen");
+      }, 3000);
+
+      // Elements
+      const startButton = document.getElementById("startButton");
+      const idInputSection = document.getElementById("idInputSection");
+      const submitIdBtn = document.getElementById("submitIdBtn");
+      const betIdInput = document.getElementById("betIdInput");
+      const inputError = document.getElementById("inputError");
+      const gameButtonsSection = document.getElementById("gameButtonsSection");
+
+      // Show input field on button click
+      startButton.addEventListener("click", () => {
+        startButton.classList.add("hidden");
+        idInputSection.classList.remove("hidden");
+      });
+
+      // Submit ID logic
+      submitIdBtn.addEventListener("click", () => {
+        const value = betIdInput.value.trim();
+        const isValid = /^\d{6,}$/.test(value); // at least 6 digits
+
+        if (!isValid) {
+          inputError.classList.remove("hidden");
+        } else {
+          inputError.classList.add("hidden");
+          idInputSection.classList.add("hidden");
+          gameButtonsSection.classList.remove("hidden");
+        }
+      });
+    </script>
+  </body>
+</html>
+
+<!-- Установить фиксированные позиции мин (нумерация ячеек идет слева направо, сверху вниз, начиная с 0):
+
+javascript
+setFixedMines(2, 7, 12); // Установит мины в позиции 2, 7 и 12
+Сбросить фиксированные позиции (вернуться к случайным):
+
+javascript
+resetMines();
+Показать текущие настройки:
+
+javascript
+showSettings();
+Пример использования:
+
+Откройте консоль разработчика (F12)
+
+Введите: setFixedMines(0, 4, 8, 12, 16) для 5×5 поля (это будут мины по диагонали)
+
+Нажмите кнопку "Get Signal" - вы увидите мины в указанных позициях
+
+Чтобы вернуться к случайным минам, введите: resetMines()
+
+Примечания:
+
+Нумерация ячеек начинается с 0 (левая верхняя ячейка) и идет слева направо, затем сверху вниз
+
+Количество указанных позиций должно соответствовать выбранному количеству мин
+
+Позиции должны быть в пределах общего количества ячеек (для 5×5 поля - от 0 до 24) -->
